@@ -2,15 +2,19 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Middleware.Data;
 using System;
 
 namespace Middleware
 {
     public class Program
     {
+        /// <summary>
+        /// Конфигурация Kestrel.
+        /// </summary>
         private static IConfiguration KestrelConfig { get; } = new ConfigurationBuilder()
          .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-         .AddJsonFile("appsettingsCustom.json", optional: false, reloadOnChange: false)
+         .AddJsonFile("KestrelOptions.json", optional: true, reloadOnChange: true)
          .AddEnvironmentVariables()
          .Build();
 
@@ -24,18 +28,21 @@ namespace Middleware
             .ConfigureLogging(log =>
             {
                 log.AddConsole().SetMinimumLevel(LogLevel.Information);
+                log.AddDebug().SetMinimumLevel(LogLevel.Information);
             })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.ConfigureKestrel(opt =>
                     {
-                        opt.Limits.KeepAliveTimeout = TimeSpan.FromSeconds(10);
-                        opt.Limits.MaxConcurrentConnections = 200_000;
-                        opt.Limits.MaxConcurrentUpgradedConnections = 100;
-                        opt.Limits.MaxRequestBodySize = 1024 * 2024 * 2; // 2MB
-
+                        KestrelOptions Kestrel = KestrelConfig.Get<KestrelOptions>();
+                        opt.Limits.KeepAliveTimeout = TimeSpan.FromSeconds(Kestrel.KeepAliveTimeout);
+                        opt.Limits.MaxConcurrentConnections = Kestrel.MaxConcurrentConnections;
+                        opt.Limits.MaxConcurrentUpgradedConnections = Kestrel.MaxConcurrentUpgradedConnections;
+                        opt.Limits.MaxRequestBodySize = Kestrel.MaxRequestBodySize;
+                        //opt.AllowSynchronousIO = true;
                     });
 
+                    //! Вопрос, не забыть задать! Почему при передачи конфига вызывается дефолтный?
                     webBuilder.UseStartup<Startup>().UseConfiguration(KestrelConfig);
                 });
     }

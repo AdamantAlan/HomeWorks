@@ -1,0 +1,6 @@
+{
+        "MaxConcurrentConnections": 200000,
+        "KeepAliveTimeout": 10,
+        "MaxConcurrentUpgradedConnections": 100,
+        "MaxRequestBodySize": 2097152
+}
