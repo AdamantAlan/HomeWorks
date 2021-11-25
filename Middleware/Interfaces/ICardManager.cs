@@ -22,10 +22,26 @@ namespace Middleware.Interfaces
         CardWriteDto SetCard(Card card);
 
         /// <summary>
+        /// Проверка существования пользователя.
+        /// </summary>
+        /// <returns>true - пользователь существует;false - пользователь не существует</returns>
+        bool UserExist(long id);
+
+        /// <summary>
         /// Выдать все карты пользователя.
         /// </summary>
         /// <param name="id">id пользователя в "БД".</param>
-        /// <returns></returns>
         IEnumerable<CardReadDto> GetCards(long id);
+
+        /// <summary>
+        /// Изменить ФИО владельца карты.
+        /// </summary>
+        IEnumerable<CardReadDto> ChangeCardHolder(long id, string newName);
+
+        /// <summary>
+        /// Удалить карту пользователя.
+        /// </summary>
+        CardReadDto DeleteCard(long userId, string pan);
+
     }
 }

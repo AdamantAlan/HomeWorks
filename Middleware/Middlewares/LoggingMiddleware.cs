@@ -41,6 +41,8 @@ namespace Middleware.Middlewares
             _log.AppendLine($"VS:{_info.vs}");
 
             log.LogInformation(_log.ToString());
+
+            _log.Clear();
         }
 
     }

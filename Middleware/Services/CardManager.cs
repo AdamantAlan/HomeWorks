@@ -30,5 +30,26 @@ namespace Middleware.Services
             Cards.Add(card);
             return _map.Map<CardWriteDto>(card);
         }
+
+        public bool UserExist(long id) => Cards.Any(c => c.UserId == id);
+
+        public IEnumerable<CardReadDto> ChangeCardHolder(long id, string newName)
+        {
+            foreach (var c in Cards)
+            {
+                if (c.UserId == id)
+                    c.Name = newName;
+            }
+
+            return GetCards(id);
+        }
+
+        public CardReadDto DeleteCard(long userId, string pan)
+        {
+            var currentCard = Cards.FirstOrDefault(c => c.UserId == userId && c.Pan == pan);
+            Cards.Remove(currentCard);
+
+            return _map.Map<CardReadDto>(currentCard);
+        }
     }
 }
