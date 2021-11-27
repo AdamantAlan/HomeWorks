@@ -25,10 +25,10 @@ namespace Middleware.Services
             return result;
         }
 
-        public CardWriteDto SetCard(Card card)
+        public CardReadDto SetCard(Card card)
         {
             Cards.Add(card);
-            return _map.Map<CardWriteDto>(card);
+            return _map.Map<CardReadDto>(card);
         }
 
         public bool UserExist(long id) => Cards.Any(c => c.UserId == id);

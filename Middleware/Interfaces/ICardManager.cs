@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Middleware.Interfaces
 {
     /// <summary>
-    /// Контракт для обработки карт пользователей.
+    /// Contract for work with user cards.
     /// </summary>
     public interface ICardManager
     {
@@ -19,7 +19,7 @@ namespace Middleware.Interfaces
         /// Записать карту в "БД".
         /// </summary>
         /// <param name="card">Карта пользователя.</param>
-        CardWriteDto SetCard(Card card);
+        CardReadDto SetCard(Card card);
 
         /// <summary>
         /// Проверка существования пользователя.

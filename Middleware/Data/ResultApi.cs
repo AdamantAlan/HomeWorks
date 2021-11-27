@@ -1,7 +1,12 @@
-﻿namespace Middleware.Data
+﻿using Middleware.Dto;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Middleware.Data
 {
     /// <summary>
-    /// Результат отработки логики от сервера.
+    /// Result work server.
     /// </summary>
     public class ResultApi
     {

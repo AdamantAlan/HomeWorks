@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations;
 namespace Middleware.Data
 {
     /// <summary>
-    /// Модель карты пользователя.
+    /// Model user card.
     /// </summary>
     public class Card
     {
         [Required]
-        public int Cvc { get; set; }
+        public string Cvc { get; set; }
 
         [Required]
         [MinLength(10)]
