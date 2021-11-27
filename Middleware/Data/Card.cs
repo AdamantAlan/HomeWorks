@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Middleware.Validations.Model;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Middleware.Data
@@ -12,11 +13,13 @@ namespace Middleware.Data
         public string Cvc { get; set; }
 
         [Required]
-        [MinLength(10)]
-        [MaxLength(13)]
+        [MinLength(13)]
+        [MaxLength(16)]
+        [CardPanValidation(ErrorMessage ="No currect pan.")]
         public string Pan { get; set; }
 
         [Required]
+        [CardDateExpireValidation(ErrorMessage ="Your card is expired.")]
         public DateTime Expire { get; set; }
 
         [Required]
