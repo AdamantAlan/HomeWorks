@@ -24,7 +24,7 @@ namespace Middleware.Controllers
         [HttpGet("test")]
         public ActionResult<string> Test()
         {
-            return Ok("Test success!");
+            return Ok(new ResultApi {Result=null });
         }
 
         [HttpPost("{userId:length(1,10)}/[action]")]
@@ -35,9 +35,9 @@ namespace Middleware.Controllers
 
             card.UserId = userId;
 
-            _manager.SetCard(card);
+            var cardDto = _manager.SetCard(card);
 
-            return Ok();
+            return Ok(new ResultApi { Result = cardDto, ErrorCode = 0, ErrorMessage = null });
         }
 
         [HttpDelete("{userId:length(1,10)}/[action]")]
@@ -52,9 +52,9 @@ namespace Middleware.Controllers
             if (!_manager.GetCards(userId).Any(c => c.Pan == pan))
                 return NotFound(new ResultApi { Result = null, ErrorCode = 799, ErrorMessage = $"User has no current card with pan {pan}" });
 
-            var deletedCard = _manager.DeleteCard(userId, pan);
+            var cardDto = _manager.DeleteCard(userId, pan);
 
-            return Ok(new ResultApi { Result = deletedCard, ErrorCode = 0, ErrorMessage = null });
+            return Ok(new ResultApi { Result = cardDto, ErrorCode = 0, ErrorMessage = null });
         }
 
         [HttpGet("{userId:length(1,10)}/[action]")]
