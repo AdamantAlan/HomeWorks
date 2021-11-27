@@ -43,30 +43,45 @@ namespace Middleware.Filters
                 _trace.AppendLine($"Key={r.Key} value={r.Value}");
             }
 
-            if (context.HttpContext.Request.Method.ToUpper() == "POST")
+            if (context.HttpContext.Request.Method.ToUpper() != "GET")
             {
-                // No currect work!
-                using var stream = new StreamReader(context.HttpContext.Request.Body);
-                var body = await stream.ReadToEndAsync();
 
-                _trace.AppendLine("------Body value");
-                if (context.HttpContext.Request.Path.Value.Contains(ActionsList.AddCard.ToString()) ||
-                   context.HttpContext.Request.Path.Value.Contains(ActionsList.DeleteCard.ToString()))
+                var req = context.HttpContext.Request;
+                if (req.Body.CanSeek)
                 {
-                    //var card = JsonSerializer.Deserialize<Card>(body);
-                    //_trace.AppendLine($"Pan: {card.UserId}");
-                    //_trace.AppendLine($"Pan: {card.Name}");
-                    //_trace.AppendLine($"Cvc: {GetHiddenCvc(card.Cvc)}");
-                    //_trace.AppendLine($"Pan: {GetHiddenPan(card.Pan)}");
-                }
-                if (context.HttpContext.Request.Path.Value.Contains(ActionsList.GetCard.ToString()))
-                {
-                    //var pan = JsonSerializer.Deserialize<string>(body);
-                    //_trace.AppendLine($"User id: {context.HttpContext.Request.RouteValues["UserId"]}");
-                    //_trace.AppendLine($"Pan: {GetHiddenPan(pan)}");
-                }
+                    req.Body.Seek(0, SeekOrigin.Begin);
 
-                _trace.AppendLine(body);
+                    using (var reader = new StreamReader(
+                      req.Body,
+                      encoding: Encoding.UTF8,
+                      bufferSize: 8192,
+                      leaveOpen: true))
+                    {
+                        var body = await reader.ReadToEndAsync();
+                        _trace.AppendLine("------Body value");
+
+                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.AddCard.ToString()) ||
+                           context.HttpContext.Request.Path.Value.Contains(ActionsList.DeleteCard.ToString()))
+                        {
+                            var card = JsonSerializer.Deserialize<Card>(body);
+                            _trace.AppendLine($"CardHolder: {card.Name}");
+                            _trace.AppendLine($"Cvc: {GetHiddenCvc(card.Cvc)}");
+                            _trace.AppendLine($"Pan: {GetHiddenPan(card.Pan)}");
+                        }
+
+                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.GetCard.ToString()))
+                        {
+                            var bodyData = JsonSerializer.Deserialize<string>(body);
+                            _trace.AppendLine($"Pan: {GetHiddenPan(bodyData)}");
+                        }
+
+                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.ChangeCardHolder.ToString()))
+                        {
+                            var bodyData = JsonSerializer.Deserialize<string>(body);
+                            _trace.AppendLine($"Pan: {bodyData}");
+                        }
+                    }
+                }
             }
 
             _log.LogInformation(_trace.ToString());
@@ -81,7 +96,7 @@ namespace Middleware.Filters
 
             if (result.Value is ResultApi values)
             {
-                GetHiddenResponseResultDataJson(values.Result ?? "No data response");
+                GetHiddenResponseResultData(values.Result ?? "No data response");
             }
 
             _log.LogInformation(_trace.ToString());
@@ -90,7 +105,7 @@ namespace Middleware.Filters
         private string GetHiddenCvc(string cvc) => "***";
         private string GetHiddenPan(string pan) => pan.Replace(pan.Substring(0, pan.Length - 4), new string('*', pan.Length - 4));
 
-        private void GetHiddenResponseResultDataJson(object result)
+        private void GetHiddenResponseResultData(object result)
         {
             StringBuilder sb = new();
 
@@ -100,7 +115,8 @@ namespace Middleware.Filters
                 {
                     _trace.AppendLine("CardHolder: " + c.Name);
                     _trace.AppendLine("Pan: " + GetHiddenPan(c.Pan));
-                    _trace.AppendLine("CardHolder: " + c.StatusCard.ToString());
+                    _trace.AppendLine("StatusCard: " + c.StatusCard.ToString());
+                    _trace.AppendLine();
                 }
             }
 
@@ -108,7 +124,8 @@ namespace Middleware.Filters
             {
                 _trace.AppendLine("CardHolder: " + card.Name);
                 _trace.AppendLine("Pan: " + GetHiddenPan(card.Pan));
-                _trace.AppendLine("CardHolder: " + card.StatusCard.ToString());
+                _trace.AppendLine("StatusCard: " + card.StatusCard.ToString());
+                _trace.AppendLine();
             }
         }
     }
