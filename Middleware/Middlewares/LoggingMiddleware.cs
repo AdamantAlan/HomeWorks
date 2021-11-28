@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Middleware.Middlewares
 {
     /// <summary>
-    /// Middleware для логгирования запросов.
+    /// Middleware for logging request/response.
     /// </summary>
     public class LoggingMiddleware
     {

@@ -9,37 +9,36 @@ namespace Middleware.Interfaces
     /// </summary>
     public interface ICardManager
     {
-        // Можно было бы создать User с cards, поздно задумался.
         /// <summary>
-        /// "БД" карт пользователей.
+        /// database for user cards.
         /// </summary>
         List<Card> Cards { get; set; }
 
         /// <summary>
-        /// Записать карту в "БД".
+        /// Write card in database.
         /// </summary>
-        /// <param name="card">Карта пользователя.</param>
+        /// <param name="card">user card.</param>
         CardReadDto SetCard(Card card);
 
         /// <summary>
-        /// Проверка существования пользователя.
+        /// Check exist user.
         /// </summary>
-        /// <returns>true - пользователь существует;false - пользователь не существует</returns>
+        /// <returns>true - user exist;false - user not exist</returns>
         bool UserExist(long id);
 
         /// <summary>
-        /// Выдать все карты пользователя.
+        /// Get all cards of user.
         /// </summary>
-        /// <param name="id">id пользователя в "БД".</param>
+        /// <param name="id">user id</param>
         IEnumerable<CardReadDto> GetCards(long id);
 
         /// <summary>
-        /// Изменить ФИО владельца карты.
+        /// Change cardholder for user cards.
         /// </summary>
         IEnumerable<CardReadDto> ChangeCardHolder(long id, string newName);
 
         /// <summary>
-        /// Удалить карту пользователя.
+        ///Delete user card.
         /// </summary>
         CardReadDto DeleteCard(long userId, string pan);
 

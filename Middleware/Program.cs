@@ -10,7 +10,7 @@ namespace Middleware
     public class Program
     {
         /// <summary>
-        /// Конфигурация Kestrel.
+        /// Options Kestrel.
         /// </summary>
         private static IConfiguration KestrelConfig { get; } = new ConfigurationBuilder()
          .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)

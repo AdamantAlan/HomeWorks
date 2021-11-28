@@ -5,7 +5,7 @@ using Middleware.Dto;
 namespace Middleware.Profiles
 {
     /// <summary>
-    /// Настройка маппера для модели Card и Dto
+    /// Opions mapper for card.
     /// <see cref="Card"/>
     /// <see cref="CardReadDto"/>
     /// <see cref="CardWriteDto"/>
@@ -15,7 +15,7 @@ namespace Middleware.Profiles
         public CardProfile()
         {
             CreateMap<Card, CardReadDto>();
-            CreateMap<Card, CardWriteDto>();
+            //CreateMap<Card, CardWriteDto>();
         }
     }
 }

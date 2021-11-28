@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace Middleware.Controllers
 {
+    /// <summary>
+    /// Controller for work with user cards.
+    /// </summary>
     [Route("api/v1/[controller]")]
     [ApiController]
     public class CardManagerController : ControllerBase
