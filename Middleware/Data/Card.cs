@@ -10,23 +10,23 @@ namespace Middleware.Data
     public class Card
     {
         [Required]
-        public string Cvc { get; set; }
+        public string cvc { get; set; }
 
         [Required]
         [MinLength(13)]
         [MaxLength(16)]
         [CardPanValidation(ErrorMessage ="No currect pan.")]
-        public string Pan { get; set; }
+        public string pan { get; set; }
 
         [Required]
         [CardDateExpireValidation(ErrorMessage ="Your card is expired.")]
-        public DateTime Expire { get; set; }
+        public DateTime expire { get; set; }
 
         [Required]
-        public string Name { get; set; }
+        public string name { get; set; }
 
-        public bool IsDefault { get; set; }
+        public bool isDefault { get; set; }
 
-        public long UserId { get; set; }
+        public long userId { get; set; }
     }
 }

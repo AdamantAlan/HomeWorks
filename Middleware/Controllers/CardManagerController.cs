@@ -26,7 +26,7 @@ namespace Middleware.Controllers
         [HttpPost("{userId:long}/[action]")]
         public ActionResult<ResultApi> AddCard(long userId, Card card)
         {
-            card.UserId = userId;
+            card.userId = userId;
 
             try
             {

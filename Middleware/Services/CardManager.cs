@@ -20,7 +20,7 @@ namespace Middleware.Services
 
         public IEnumerable<CardReadDto> GetCards(long id)
         {
-            var cards = Cards.Where(c => c.UserId == id);
+            var cards = Cards.Where(c => c.userId == id);
             var result = _map.Map<IEnumerable<CardReadDto>>(cards);
             return result;
         }
@@ -31,14 +31,14 @@ namespace Middleware.Services
             return _map.Map<CardReadDto>(card);
         }
 
-        public bool UserExist(long id) => Cards.Any(c => c.UserId == id);
+        public bool UserExist(long id) => Cards.Any(c => c.userId == id);
 
         public IEnumerable<CardReadDto> ChangeCardHolder(long id, string newName)
         {
             foreach (var c in Cards)
             {
-                if (c.UserId == id)
-                    c.Name = newName;
+                if (c.userId == id)
+                    c.name = newName;
             }
 
             return GetCards(id);
@@ -46,7 +46,7 @@ namespace Middleware.Services
 
         public CardReadDto DeleteCard(long userId, string pan)
         {
-            var currentCard = Cards.FirstOrDefault(c => c.UserId == userId && c.Pan == pan);
+            var currentCard = Cards.FirstOrDefault(c => c.userId == userId && c.pan == pan);
             Cards.Remove(currentCard);
 
             return _map.Map<CardReadDto>(currentCard);

@@ -60,16 +60,16 @@ namespace Middleware.Filters
                         var body = await reader.ReadToEndAsync();
                         _trace.AppendLine("------Body value");
 
-                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.AddCard.ToString()) ||
-                           context.HttpContext.Request.Path.Value.Contains(ActionsList.DeleteCard.ToString()))
+                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.AddCard.ToString()))
                         {
                             var card = JsonSerializer.Deserialize<Card>(body);
-                            _trace.AppendLine($"CardHolder: {card.Name}");
-                            _trace.AppendLine($"Cvc: {GetHiddenCvc(card.Cvc)}");
-                            _trace.AppendLine($"Pan: {GetHiddenPan(card.Pan)}");
+                            _trace.AppendLine($"CardHolder: {card.name}");
+                            _trace.AppendLine($"Cvc: {GetHiddenCvc(card.cvc)}");
+                            _trace.AppendLine($"Pan: {GetHiddenPan(card.pan)}");
                         }
 
-                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.GetCard.ToString()))
+                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.GetCard.ToString()) ||
+                             context.HttpContext.Request.Path.Value.Contains(ActionsList.DeleteCard.ToString()))
                         {
                             var bodyData = JsonSerializer.Deserialize<string>(body);
                             _trace.AppendLine($"Pan: {GetHiddenPan(bodyData)}");
