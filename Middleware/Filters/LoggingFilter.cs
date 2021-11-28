@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Middleware.Data;
 using Middleware.Dto;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,78 +28,101 @@ namespace Middleware.Filters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            _trace.AppendLine("------Request data");
-
-            _trace.AppendLine("------Query values");
-            var querys = context.HttpContext.Request.Query.ToList();
-            foreach (var q in querys)
+            try
             {
-                _trace.AppendLine($"Key={q.Key} value={q.Value}");
-            }
+                _trace.AppendLine("------Request data");
 
-            _trace.AppendLine("------Route values");
-            var routers = context.HttpContext.Request.RouteValues.ToList();
-            foreach (var r in routers)
-            {
-                _trace.AppendLine($"Key={r.Key} value={r.Value}");
-            }
-
-            if (context.HttpContext.Request.Method.ToUpper() != "GET")
-            {
-
-                var req = context.HttpContext.Request;
-                if (req.Body.CanSeek)
+                _trace.AppendLine("------Query values");
+                var querys = context.HttpContext.Request.Query.ToList();
+                foreach (var q in querys)
                 {
-                    req.Body.Seek(0, SeekOrigin.Begin);
+                    _trace.AppendLine($"Key={q.Key} value={q.Value}");
+                }
 
-                    using (var reader = new StreamReader(
-                      req.Body,
-                      encoding: Encoding.UTF8,
-                      bufferSize: 8192,
-                      leaveOpen: true))
+                _trace.AppendLine("------Route values");
+                var routers = context.HttpContext.Request.RouteValues.ToList();
+                foreach (var r in routers)
+                {
+                    _trace.AppendLine($"Key={r.Key} value={r.Value}");
+                }
+
+                if (context.HttpContext.Request.Method.ToUpper() != "GET")
+                {
+
+                    var req = context.HttpContext.Request;
+                    if (req.Body.CanSeek)
                     {
-                        var body = await reader.ReadToEndAsync();
-                        _trace.AppendLine("------Body value");
+                        req.Body.Seek(0, SeekOrigin.Begin);
 
-                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.AddCard.ToString()))
+                        using (var reader = new StreamReader(
+                          req.Body,
+                          encoding: Encoding.UTF8,
+                          bufferSize: 8192,
+                          leaveOpen: true))
                         {
-                            var card = JsonSerializer.Deserialize<Card>(body);
-                            _trace.AppendLine($"CardHolder: {card.name}");
-                            _trace.AppendLine($"Cvc: {GetHiddenCvc(card.cvc)}");
-                            _trace.AppendLine($"Pan: {GetHiddenPan(card.pan)}");
-                        }
+                            var body = await reader.ReadToEndAsync();
+                            _trace.AppendLine("------Body value");
 
-                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.GetCard.ToString()) ||
-                             context.HttpContext.Request.Path.Value.Contains(ActionsList.DeleteCard.ToString()))
-                        {
-                            var bodyData = JsonSerializer.Deserialize<string>(body);
-                            _trace.AppendLine($"Pan: {GetHiddenPan(bodyData)}");
-                        }
+                            if (context.HttpContext.Request.Path.Value.Contains(ActionsList.AddCard.ToString()))
+                            {
+                                var card = JsonSerializer.Deserialize<Card>(body);
+                                _trace.AppendLine($"CardHolder: {card.name}");
+                                _trace.AppendLine($"Cvc: {GetHiddenCvc(card.cvc)}");
+                                _trace.AppendLine($"Pan: {GetHiddenPan(card.pan)}");
+                            }
 
-                        if (context.HttpContext.Request.Path.Value.Contains(ActionsList.ChangeCardHolder.ToString()))
-                        {
-                            var bodyData = JsonSerializer.Deserialize<string>(body);
-                            _trace.AppendLine($"Pan: {bodyData}");
+                            if (context.HttpContext.Request.Path.Value.Contains(ActionsList.GetCard.ToString()) ||
+                                 context.HttpContext.Request.Path.Value.Contains(ActionsList.DeleteCard.ToString()))
+                            {
+                                var bodyData = JsonSerializer.Deserialize<string>(body);
+                                _trace.AppendLine($"Pan: {GetHiddenPan(bodyData)}");
+                            }
+
+                            if (context.HttpContext.Request.Path.Value.Contains(ActionsList.ChangeCardHolder.ToString()))
+                            {
+                                var bodyData = JsonSerializer.Deserialize<string>(body);
+                                _trace.AppendLine($"Pan: {bodyData}");
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                _log.LogInformation(_trace.ToString());
+                _log.LogError($"Error logging request, {e.Message}");
+                _log.LogError(e.StackTrace);
             }
 
             _log.LogInformation(_trace.ToString());
 
             var executedContext = await next();
 
-            _trace.Clear();
-            _trace.AppendLine("------Response data");
-
-            var result = executedContext.Result as ObjectResult;
-            _trace.AppendLine($"Response code: {result.StatusCode}");
-
-            if (result.Value is ResultApi values)
+            try
             {
-                GetHiddenResponseResultData(values.Result ?? "No data response");
-            }
+                _trace.Clear();
+                _trace.AppendLine("------Response data");
 
+                var result = executedContext.Result as ObjectResult;
+                _trace.AppendLine($"Response code: {result.StatusCode}");
+
+                if (result.Value is ResultApi values && values.Result != null)
+                {
+                    GetHiddenResponseResultData(values.Result);
+                }
+
+                if (result.Value is ResultApi error && error.Result == null)
+                {
+                    _trace.AppendLine($"Error code: {error.ErrorCode}");
+                    _trace.AppendLine($"Error message: {error.ErrorMessage}");
+                }
+            }
+            catch (Exception e)
+            {
+                _log.LogInformation(_trace.ToString());
+                _log.LogError($"Error logging response, {e.Message}");
+                _log.LogError(e.StackTrace);
+            }
             _log.LogInformation(_trace.ToString());
         }
 
