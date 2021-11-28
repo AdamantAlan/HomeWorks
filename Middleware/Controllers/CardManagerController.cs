@@ -26,6 +26,16 @@ namespace Middleware.Controllers
             return Ok(new ResultApi { Result = null });
         }
 
+        /// <summary>
+        /// Add new user card.
+        /// </summary>
+        /// <param name="userId">User id</param>
+        /// <param name="card">New user card</param>
+        /// <response code="200">Card added</response>
+        /// <response code="500">Card dont added, server error</response>
+        /// <returns>Result work server</returns>
+        [ProducesResponseType(typeof(ResultApi), 200)]
+        [ProducesResponseType(typeof(ResultApi), 500)]
         [HttpPost("{userId:long}/[action]")]
         public ActionResult<ResultApi> AddCard(long userId, Card card)
         {
@@ -43,6 +53,18 @@ namespace Middleware.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete user card.
+        /// </summary>
+        /// <param name="userId">User id</param>
+        /// <param name="pan">Number pan card</param>
+        /// <response code="200">Card added</response>
+        /// <response code="404">Not found user or card</response>
+        /// <response code="500">Card dont added, server error</response>
+        /// <returns>Result work server</returns>
+        [ProducesResponseType(typeof(ResultApi), 200)]
+        [ProducesResponseType(typeof(ResultApi), 500)]
+        [ProducesResponseType(typeof(ResultApi), 404)]
         [HttpDelete("{userId:long}/[action]")]
         public ActionResult<ResultApi> DeleteCard(long userId, [FromBody] string pan)
         {
@@ -64,6 +86,17 @@ namespace Middleware.Controllers
             }
         }
 
+        /// <summary>
+        /// Get user cards
+        /// </summary>
+        /// <param name="userId">User id</param>
+        /// <response code="200">Cards getted</response>
+        /// <response code="404">User not found</response>
+        /// <response code="500">Cards dont added, server error</response>
+        /// <returns>Result work server</returns>
+        [ProducesResponseType(typeof(ResultApi), 200)]
+        [ProducesResponseType(typeof(ResultApi), 500)]
+        [ProducesResponseType(typeof(ResultApi), 404)]
         [HttpGet("{userId:long}/[action]")]
         public ActionResult<ResultApi> GetCards(long userId)
         {
@@ -83,6 +116,18 @@ namespace Middleware.Controllers
 
         }
 
+        /// <summary>
+        /// Get user one card
+        /// </summary>
+        /// <param name="userId">User id</param>
+        /// <param name="pan">Number pan card</param>
+        /// <response code="200">Card getted</response>
+        /// <response code="404">User not found</response>
+        /// <response code="500">Card dont added, server error</response>
+        /// <returns>Result work server</returns>
+        [ProducesResponseType(typeof(ResultApi), 200)]
+        [ProducesResponseType(typeof(ResultApi), 500)]
+        [ProducesResponseType(typeof(ResultApi), 404)]
         [HttpPost("{userId:long}/[action]")]
         public ActionResult<ResultApi> GetCard([FromRoute] long userId, [FromBody] string pan)
         {
@@ -105,6 +150,18 @@ namespace Middleware.Controllers
             }
         }
 
+        /// <summary>
+        /// Change cardHolder on user cards
+        /// </summary>
+        /// <param name="userId">User id</param>
+        /// <param name="cardHolderName">New nameholder on cards</param>
+        /// <response code="200">Card changed</response>
+        /// <response code="404">User not found</response>
+        /// <response code="500">Server error</response>
+        /// <returns>Result work server</returns>
+        [ProducesResponseType(typeof(ResultApi), 200)]
+        [ProducesResponseType(typeof(ResultApi), 500)]
+        [ProducesResponseType(typeof(ResultApi), 404)]
         [HttpPatch("{userId:long}/[action]")]
         public ActionResult<ResultApi> ChangeCardHolder([FromRoute] long userId, [FromBody] string cardHolderName)
         {

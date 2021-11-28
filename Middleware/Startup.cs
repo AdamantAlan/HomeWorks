@@ -8,9 +8,12 @@ using Microsoft.OpenApi.Models;
 using Middleware.Data;
 using Middleware.Extensions;
 using Middleware.Filters;
+using Middleware.Filters.Schemas;
 using Middleware.Interfaces;
 using Middleware.Services;
 using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Middleware
 {
@@ -33,15 +36,41 @@ namespace Middleware
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Card manager API", Version = "v1" });
+
+                var filePath = Path.Combine(AppContext.BaseDirectory, $"{nameof(Middleware)}.xml");
+                c.IncludeXmlComments(filePath);
+
+                c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.ApiKey,
+                    In = ParameterLocation.Header,
+                    Name = "API-KEY",
+                    Description = "Api key auth",
+                });
+
+                var key = new OpenApiSecurityScheme()
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "ApiKey"
+                    },
+                    In = ParameterLocation.Header
+                };
+                var requirement = new OpenApiSecurityRequirement
+                {
+                    { key, new List<string>() }
+                };
+                c.AddSecurityRequirement(requirement);
+
+                c.SchemaFilter<EnumSchemaFilter>();
             });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
             app.Logging(new ServerInfo { env = _config["ASPNETCORE_ENVIRONMENT"] ?? "No set", vs = _config["VisualStudioEdition"] ?? "No set", server = _config["LOGONSERVER"] ?? "No set" });
 
@@ -49,6 +78,20 @@ namespace Middleware
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("v1/swagger.json", "Card manager API V1");
+            });
+
+            app.UseReDoc(c => { c.RoutePrefix = "docs"; });
+
+            app.Use(async (context, next) =>
+            {
+                if (!context.Request.Headers.TryGetValue("API-KEY", out var key) || !key.Equals("test"))
+                {
+                    context.Response.StatusCode = 401;
+                    await context.Response.WriteAsJsonAsync(new ResultApi {Result=null, ErrorCode=401,ErrorMessage= "not authorized request" });
+                    return;
+                }
+
+                await next();
             });
 
             app.Use((context, next) =>
