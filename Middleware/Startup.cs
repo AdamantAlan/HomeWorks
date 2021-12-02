@@ -29,7 +29,13 @@ namespace Middleware
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews(opt => { opt.EnableEndpointRouting = false; opt.Filters.Add(typeof(LoggingFilter)); });
+            services.AddControllersWithViews(opt =>
+            {
+                opt.EnableEndpointRouting = false;
+                opt.Filters.Add(typeof(LoggingFilter));
+                opt.Filters.Add(typeof(ExceptionFilter));
+            });
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSingleton<ICardManager, CardManager>();
 
@@ -87,7 +93,7 @@ namespace Middleware
                 if (!context.Request.Headers.TryGetValue("API-KEY", out var key) || !key.Equals("test"))
                 {
                     context.Response.StatusCode = 401;
-                    await context.Response.WriteAsJsonAsync(new ResultApi {Result=null, ErrorCode=401,ErrorMessage= "not authorized request" });
+                    await context.Response.WriteAsJsonAsync(new ResultApi<string> { Result = "use header API-KEY:test !", ErrorCode = 401, ErrorMessage = "not authorized request" });
                     return;
                 }
 

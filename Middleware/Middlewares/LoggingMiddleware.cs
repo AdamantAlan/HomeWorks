@@ -13,7 +13,7 @@ namespace Middleware.Middlewares
     public class LoggingMiddleware
     {
         private readonly RequestDelegate _next;
-        private StringBuilder _log;
+        private readonly StringBuilder _log;
         private ServerInfo _info;
 
         public LoggingMiddleware(RequestDelegate next, ServerInfo info)
