@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Middleware.Migrations
 {
-    [DbContext(typeof(CardDbContext))]
+    [DbContext(typeof(HomeWorkDbContext))]
     partial class CardDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

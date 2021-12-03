@@ -39,8 +39,8 @@ namespace Middleware
             });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddSingleton<ICardManager, CardManager>();
-            services.AddDbContext<CardDbContext>(opt => opt.UseNpgsql(_config.GetConnectionString("Npg")));
+            services.AddSingleton<IRepository, RepositoryDbHomeWork>();
+            services.AddDbContext<HomeWorkDbContext>(opt => opt.UseNpgsql(_config.GetConnectionString("Npg")));
 
             services.AddSwaggerGen(c =>
             {

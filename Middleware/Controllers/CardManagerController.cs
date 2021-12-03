@@ -19,10 +19,10 @@ namespace Middleware.Controllers
     [ProducesResponseType(typeof(ResultApi<string>), 404)]
     public class CardManagerController : ControllerBase
     {
-        private readonly ICardManager _manager;
+        private readonly IRepository _manager;
         //private readonly CardDbContext _cont;
 
-        public CardManagerController(ICardManager cardManager)//, CardDbContext cont)
+        public CardManagerController(IRepository cardManager)//, CardDbContext cont)
         {
             _manager = cardManager;
         //    _cont = cont;

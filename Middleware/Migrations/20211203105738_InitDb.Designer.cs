@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Middleware.Migrations
 {
-    [DbContext(typeof(CardDbContext))]
+    [DbContext(typeof(HomeWorkDbContext))]
     [Migration("20211203105738_InitDb")]
     partial class InitDb
     {

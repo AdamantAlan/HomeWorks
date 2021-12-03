@@ -1,45 +1,47 @@
 ﻿using Middleware.Data;
 using Middleware.Dto;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Middleware.Interfaces
 {
     /// <summary>
     /// Contract for work with user cards.
     /// </summary>
-    public interface ICardManager
+    public interface IRepository
     {
-        /// <summary>
-        /// database for user cards.
-        /// </summary>
-        List<Card> Cards { get; set; }
-
         /// <summary>
         /// Write card in database.
         /// </summary>
         /// <param name="card">user card.</param>
-        CardReadDto SetCard(CardWriteDto card);
+        Task<long> CreateAsync<T>(T entity) where T : IEntity;
 
         /// <summary>
-        /// Check exist user.
+        /// Check exist entity.
         /// </summary>
-        /// <returns>true - user exist;false - user not exist</returns>
-        bool UserExist(long id);
+        /// <returns>true - entity exist;false - entity not exist</returns>
+        Task<bool> EntityExist<T>(T entity) where T : IEntity;
 
         /// <summary>
         /// Get all cards of user.
         /// </summary>
         /// <param name="id">user id</param>
-        IEnumerable<CardReadDto> GetCards(long id);
+        IQueryable<T> GetAll<T>() where T : class, IEntity;
 
         /// <summary>
         /// Change cardholder for user cards.
         /// </summary>
-        IEnumerable<CardReadDto> ChangeCardHolder(long id, string newName);
+        Task<long> UpdateAsync<T>(T entity) where T : IEntity;
 
         /// <summary>
-        ///Delete user card.
+        /// Delete user card.
         /// </summary>
-        CardReadDto DeleteCard(long userId, string pan);
+        Task<long> DeleteAsync<T>(T entity) where T : IEntity;
+
+        /// <summary>
+        /// Save update entity.
+        /// </summary>
+        Task<bool> SaveChangeAsync();
     }
 }
