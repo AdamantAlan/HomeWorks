@@ -7,40 +7,43 @@ using System.Threading.Tasks;
 namespace Middleware.Interfaces
 {
     /// <summary>
-    /// Contract for work with user cards.
+    /// Repository cintract for database HomeWork.
     /// </summary>
     public interface IRepository
     {
         /// <summary>
-        /// Write card in database.
+        /// Write entity in database.
         /// </summary>
-        /// <param name="card">user card.</param>
         Task<long> CreateAsync<T>(T entity) where T : IEntity;
 
         /// <summary>
         /// Check exist entity.
         /// </summary>
         /// <returns>true - entity exist;false - entity not exist</returns>
-        Task<bool> EntityExist<T>(T entity) where T : IEntity;
+        Task<bool> EntityExist<T>(long id) where T : class, IEntity;
 
         /// <summary>
-        /// Get all cards of user.
+        /// Get all entity.
         /// </summary>
-        /// <param name="id">user id</param>
         IQueryable<T> GetAll<T>() where T : class, IEntity;
 
         /// <summary>
-        /// Change cardholder for user cards.
+        /// Get all entity.
+        /// </summary>
+        Task<T> GetAsync<T>(long id) where T : class, IEntity;
+
+        /// <summary>
+        /// Update entity.
         /// </summary>
         Task<long> UpdateAsync<T>(T entity) where T : IEntity;
 
         /// <summary>
-        /// Delete user card.
+        /// Delete entity.
         /// </summary>
-        Task<long> DeleteAsync<T>(T entity) where T : IEntity;
+        Task DeleteAsync<T>(T entity) where T : class, IEntity;
 
         /// <summary>
-        /// Save update entity.
+        /// Save entity.
         /// </summary>
         Task<bool> SaveChangeAsync();
     }

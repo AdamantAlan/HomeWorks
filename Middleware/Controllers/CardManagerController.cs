@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Middleware.Data;
 using Middleware.Data.DbContexts;
 using Middleware.Dto;
@@ -6,6 +8,7 @@ using Middleware.Extensions;
 using Middleware.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Middleware.Controllers
 {
@@ -20,12 +23,12 @@ namespace Middleware.Controllers
     public class CardManagerController : ControllerBase
     {
         private readonly IRepository _manager;
-        //private readonly CardDbContext _cont;
+        private readonly IMapper _map;
 
-        public CardManagerController(IRepository cardManager)//, CardDbContext cont)
+        public CardManagerController(IRepository cardManager, IMapper map)
         {
             _manager = cardManager;
-        //    _cont = cont;
+            _map = map;
         }
 
         [HttpGet("test")]
@@ -35,20 +38,20 @@ namespace Middleware.Controllers
         /// Add new user card.
         /// </summary>
         /// <param name="userId">User id</param>
-        /// <param name="card">New user card</param>
+        /// <param name="cardWriteDto">New user card</param>
         /// <response code="200">Card added</response>
         /// <response code="500">Card dont added, server error</response>
         /// <response code="404">Non used</response>
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<CardReadDto>), 200)]
         [HttpPost("{userId:long}/[action]")]
-        public ActionResult<ResultApi<object>> AddCard(long userId, CardWriteDto card)
+        public async Task<ActionResult<ResultApi<object>>> AddCard(long userId, CardWriteDto cardWriteDto)
         {
-            card.userId = userId;
-            var cardDto = _manager.SetCard(card);
-            //_cont.Cards.Add(new Card() {Cvc=card.cvc,Expire=card.expire, IsDefault= card.isDefault, Name= card.name,Pan=card.pan,UserId=card.userId });
-            //_cont.SaveChanges();
-            return Ok(new ResultApi<CardReadDto> { Result = cardDto, ErrorCode = 0, ErrorMessage = null });
+            cardWriteDto.userId = userId;
+            var id = await _manager.CreateAsync(_map.Map<Card>(cardWriteDto));
+
+            var cardReadDto = _map.Map<CardReadDto>(await _manager.GetAsync<Card>(id));
+            return Ok(new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null });
         }
 
         /// <summary>
@@ -62,16 +65,17 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<CardReadDto>), 200)]
         [HttpDelete("{userId:long}/[action]")]
-        public ActionResult<ResultApi<object>> DeleteCard(long userId, [FromBody] string pan)
+        public async Task<ActionResult<ResultApi<object>>> DeleteCard(long userId, [FromBody] string pan)
         {
-            if (!_manager.UserExist(userId))
-                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "User not found." });
+            var card = _manager.GetAll<Card>().FirstOrDefault(c => c.UserId == userId && c.Pan == pan);
 
-            if (!_manager.GetCards(userId).Any(c => c.Pan == pan))
-                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 799, ErrorMessage = $"User has no current card with pan {pan.GetHiddenPan()}" });
+            if (card == null)
+                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Card not found." });
 
-            var cardDto = _manager.DeleteCard(userId, pan);
-            return Ok(new ResultApi<CardReadDto> { Result = cardDto, ErrorCode = 0, ErrorMessage = null });
+            await _manager.DeleteAsync(card);
+
+            var cardReadDto = _map.Map<CardReadDto>(card);
+            return Ok(new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null });
         }
 
         /// <summary>
@@ -84,14 +88,15 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<IEnumerable<CardReadDto>>), 200)]
         [HttpGet("{userId:long}/[action]")]
-        public ActionResult<ResultApi<IEnumerable<object>>> GetCards(long userId)
+        public async Task<ActionResult<ResultApi<IEnumerable<object>>>> GetCards(long userId)
         {
-            if (!_manager.UserExist(userId))
-                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "User not found." });
-            //var c = _cont.Cards.ToList();
-            var cards = _manager.GetCards(userId);
+            var cards = await _manager.GetAll<Card>().Where(c => c.UserId == userId).ToListAsync();
 
-            return Ok(new ResultApi<IEnumerable<CardReadDto>> { Result = cards, ErrorCode = 0, ErrorMessage = null });
+            if (!cards.Any())
+                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Cards not found." });
+
+            var cardsReadDto = _map.Map<IEnumerable<CardReadDto>>(cards);
+            return Ok(new ResultApi<IEnumerable<CardReadDto>> { Result = cardsReadDto, ErrorCode = 0, ErrorMessage = null });
         }
 
         /// <summary>
@@ -107,15 +112,12 @@ namespace Middleware.Controllers
         [HttpPost("{userId:long}/[action]")]
         public ActionResult<ResultApi<object>> GetCard([FromRoute] long userId, [FromBody] string pan)
         {
-            if (!_manager.UserExist(userId))
-                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "User not found." });
+            var card = _manager.GetAll<Card>().FirstOrDefault(c => c.UserId == userId && c.Pan == pan);
+            if (card == null)
+                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Card not found." });
 
-            var card = _manager.GetCards(userId).FirstOrDefault(c => c.Pan == pan);
-
-            if (card != null)
-                return Ok(new ResultApi<CardReadDto> { Result = card, ErrorCode = 0, ErrorMessage = null });
-            else
-                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 799, ErrorMessage = $"User has no current card with pan {pan}" });
+            var cardReadDto = _map.Map<CardReadDto>(card);
+            return Ok(new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null });
         }
 
         /// <summary>
@@ -131,16 +133,26 @@ namespace Middleware.Controllers
         [ProducesResponseType(typeof(ResultApi<IEnumerable<CardReadDto>>), 200)]
         [ProducesResponseType(typeof(ResultApi<string>), 400)]
         [HttpPatch("{userId:long}/[action]")]
-        public ActionResult<ResultApi<IEnumerable<object>>> ChangeCardHolder([FromRoute] long userId, [FromBody] string cardHolderName)
+        public async Task<ActionResult<ResultApi<IEnumerable<object>>>> ChangeCardHolder([FromRoute] long userId, [FromBody] string cardHolderName)
         {
-            if (!_manager.UserExist(userId))
-                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "User not found." });
 
             if (long.TryParse(cardHolderName, out long c))
                 return BadRequest(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 801, ErrorMessage = "Wrong cardholder." });
 
-            var cards = _manager.ChangeCardHolder(userId, cardHolderName);
-            return Ok(new ResultApi<IEnumerable<CardReadDto>> { Result = cards, ErrorCode = 0, ErrorMessage = null });
+            var cards = await _manager.GetAll<Card>().Where(c => c.UserId == userId).ToListAsync();
+            if (!cards.Any())
+                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Cards not found." });
+
+            foreach (Card card in cards)
+            {
+                card.Name = cardHolderName;
+            }
+
+            if (!(await _manager.SaveChangeAsync()))
+                return new InternalServerErrorObjectResult(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 812, ErrorMessage = "Today change cardholder is lock." });
+
+            var cardsReadDtos = _map.Map<IEnumerable<CardReadDto>>(cards);
+            return Ok(new ResultApi<IEnumerable<CardReadDto>> { Result = cardsReadDtos, ErrorCode = 0, ErrorMessage = null });
         }
     }
 }

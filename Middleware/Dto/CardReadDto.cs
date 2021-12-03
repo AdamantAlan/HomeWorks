@@ -7,6 +7,8 @@ namespace Middleware.Dto
     /// </summary>
     public class CardReadDto
     {
+        public long Id { get; set; }
+
         public string Pan { get; set; }
 
         public string Name { get; set; }

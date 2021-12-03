@@ -39,7 +39,7 @@ namespace Middleware
             });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddSingleton<IRepository, RepositoryDbHomeWork>();
+            services.AddScoped<IRepository, RepositoryDbHomeWork>();
             services.AddDbContext<HomeWorkDbContext>(opt => opt.UseNpgsql(_config.GetConnectionString("Npg")));
 
             services.AddSwaggerGen(c =>

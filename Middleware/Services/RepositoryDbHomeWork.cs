@@ -27,18 +27,18 @@ namespace Middleware.Services
             return entity.Id;
         }
 
-        public async Task<long> DeleteAsync<T>(T entity) where T : IEntity
+        public async Task DeleteAsync<T>(T entity) where T : class, IEntity
         {
-            await Task.Run(() => { _db.Remove(entity); });
+            _db.Remove(entity);
             await SaveChangeAsync();
-
-            return entity.Id;
         }
 
-        public async Task<bool> EntityExist<T>(T entity) where T : IEntity => await _db.FindAsync(typeof(IEntity), entity.Id) != null;
+        public async Task<bool> EntityExist<T>(long id) where T : class, IEntity => await _db.FindAsync<T>(id) != null;
 
 
-        public IQueryable<T> GetAll<T>() where T : class, IEntity => _db.Set<T>().AsNoTracking();
+        public IQueryable<T> GetAll<T>() where T : class, IEntity => _db.Set<T>();
+
+        public async Task<T> GetAsync<T>(long id) where T : class, IEntity => await GetAll<T>().FirstOrDefaultAsync(e => e.Id == id);
 
         public async Task<bool> SaveChangeAsync() => await _db.SaveChangesAsync() > 0;
 
