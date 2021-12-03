@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Middleware.Data;
 using Middleware.Data.DbContexts;
+using Middleware.Data.Dto;
+using Middleware.Data.Model;
 using Middleware.Dto;
 using Middleware.Extensions;
 using Middleware.Interfaces;

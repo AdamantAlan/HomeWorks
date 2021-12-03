@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Middleware.Data
+namespace Middleware.Data.Model
 {
     /// <summary>
     /// Model user card.

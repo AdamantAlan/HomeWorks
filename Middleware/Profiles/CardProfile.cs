@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using Middleware.Data;
+using Middleware.Data.Dto;
+using Middleware.Data.Model;
 using Middleware.Dto;
 
 namespace Middleware.Profiles

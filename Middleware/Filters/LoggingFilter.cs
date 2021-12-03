@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Middleware.Data;
+using Middleware.Data.Dto;
 using Middleware.Dto;
 using Middleware.Extensions;
 using System;
