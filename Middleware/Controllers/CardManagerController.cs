@@ -26,7 +26,7 @@ namespace Middleware.Controllers
         }
 
         [HttpGet("test")]
-        public ActionResult<string> Test() => Ok(new ResultApi<string> { Result = "Success!" });
+        public ActionResult<ResultApi<string>> Test() => new ResultApi<string> { Result = "Success!" };
 
         /// <summary>
         /// Add new user card.
@@ -39,11 +39,11 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<CardReadDto>), 200)]
         [HttpPost("{userId:long}/[action]")]
-        public ActionResult<ResultApi<object>> AddCard(long userId, Card card)
+        public ActionResult<ResultApi<CardReadDto>> AddCard(long userId, Card card)
         {
             card.userId = userId;
             var cardDto = _manager.SetCard(card);
-            return Ok(new ResultApi<CardReadDto> { Result = cardDto, ErrorCode = 0, ErrorMessage = null });
+            return new ResultApi<CardReadDto> { Result = cardDto, ErrorCode = 0, ErrorMessage = null };
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<CardReadDto>), 200)]
         [HttpDelete("{userId:long}/[action]")]
-        public ActionResult<ResultApi<object>> DeleteCard(long userId, [FromBody] string pan)
+        public ActionResult<ResultApi<CardReadDto>> DeleteCard(long userId, [FromBody] string pan)
         {
             if (!_manager.UserExist(userId))
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "User not found." });
@@ -66,7 +66,7 @@ namespace Middleware.Controllers
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 799, ErrorMessage = $"User has no current card with pan {pan.GetHiddenPan()}" });
 
             var cardDto = _manager.DeleteCard(userId, pan);
-            return Ok(new ResultApi<CardReadDto> { Result = cardDto, ErrorCode = 0, ErrorMessage = null });
+            return new ResultApi<CardReadDto> { Result = cardDto, ErrorCode = 0, ErrorMessage = null };
         }
 
         /// <summary>
@@ -79,14 +79,14 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<IEnumerable<CardReadDto>>), 200)]
         [HttpGet("{userId:long}/[action]")]
-        public ActionResult<ResultApi<IEnumerable<object>>> GetCards(long userId)
+        public ActionResult<ResultApi<IEnumerable<CardReadDto>>> GetCards(long userId)
         {
             if (!_manager.UserExist(userId))
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "User not found." });
 
             var cards = _manager.GetCards(userId);
 
-            return Ok(new ResultApi<IEnumerable<CardReadDto>> { Result = cards, ErrorCode = 0, ErrorMessage = null });
+            return new ResultApi<IEnumerable<CardReadDto>> { Result = cards, ErrorCode = 0, ErrorMessage = null };
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<CardReadDto>), 200)]
         [HttpPost("{userId:long}/[action]")]
-        public ActionResult<ResultApi<object>> GetCard([FromRoute] long userId, [FromBody] string pan)
+        public ActionResult<ResultApi<CardReadDto>> GetCard([FromRoute] long userId, [FromBody] string pan)
         {
             if (!_manager.UserExist(userId))
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "User not found." });
@@ -108,7 +108,7 @@ namespace Middleware.Controllers
             var card = _manager.GetCards(userId).FirstOrDefault(c => c.Pan == pan);
 
             if (card != null)
-                return Ok(new ResultApi<CardReadDto> { Result = card, ErrorCode = 0, ErrorMessage = null });
+                return new ResultApi<CardReadDto> { Result = card, ErrorCode = 0, ErrorMessage = null };
             else
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 799, ErrorMessage = $"User has no current card with pan {pan}" });
         }
@@ -126,7 +126,7 @@ namespace Middleware.Controllers
         [ProducesResponseType(typeof(ResultApi<IEnumerable<CardReadDto>>), 200)]
         [ProducesResponseType(typeof(ResultApi<string>), 400)]
         [HttpPatch("{userId:long}/[action]")]
-        public ActionResult<ResultApi<IEnumerable<object>>> ChangeCardHolder([FromRoute] long userId, [FromBody] string cardHolderName)
+        public ActionResult<ResultApi<IEnumerable<CardReadDto>>> ChangeCardHolder([FromRoute] long userId, [FromBody] string cardHolderName)
         {
             if (!_manager.UserExist(userId))
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "User not found." });
@@ -135,7 +135,7 @@ namespace Middleware.Controllers
                 return BadRequest(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 801, ErrorMessage = "Wrong cardholder." });
 
             var cards = _manager.ChangeCardHolder(userId, cardHolderName);
-            return Ok(new ResultApi<IEnumerable<CardReadDto>> { Result = cards, ErrorCode = 0, ErrorMessage = null });
+            return new ResultApi<IEnumerable<CardReadDto>> { Result = cards, ErrorCode = 0, ErrorMessage = null };
         }
     }
 }
