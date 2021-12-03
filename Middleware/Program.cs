@@ -10,7 +10,7 @@ namespace Middleware
     public class Program
     {
         /// <summary>
-        /// Конфигурация Kestrel.
+        /// Options Kestrel.
         /// </summary>
         private static IConfiguration KestrelConfig { get; } = new ConfigurationBuilder()
          .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
@@ -39,10 +39,8 @@ namespace Middleware
                         opt.Limits.MaxConcurrentConnections = Kestrel.MaxConcurrentConnections;
                         opt.Limits.MaxConcurrentUpgradedConnections = Kestrel.MaxConcurrentUpgradedConnections;
                         opt.Limits.MaxRequestBodySize = Kestrel.MaxRequestBodySize;
-                        //opt.AllowSynchronousIO = true;
                     });
 
-                    //! Вопрос, не забыть задать! Почему при передачи конфига вызывается дефолтный?
                     webBuilder.UseStartup<Startup>().UseConfiguration(KestrelConfig);
                 });
     }

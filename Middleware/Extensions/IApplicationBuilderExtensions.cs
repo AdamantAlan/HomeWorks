@@ -8,7 +8,7 @@ namespace Middleware.Extensions
     static class IApplicationBuilderExtensions
     {
         /// <summary>
-        /// Метод расширения для более читабельного вызова middleware.
+        /// An extension method for a more readable call to middleware.
         /// </summary>
         public static IApplicationBuilder Logging(this IApplicationBuilder builder, ServerInfo info)
         {

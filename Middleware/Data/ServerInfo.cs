@@ -1,7 +1,7 @@
 ﻿namespace Middleware.Data
 {
     /// <summary>
-    /// Структура для записи переменных окружения.
+    /// Structure for writing environment variables.
     /// </summary>
     public struct ServerInfo
     {

@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 namespace Middleware.Middlewares
 {
     /// <summary>
-    /// Middleware для логгирования запросов.
+    /// Middleware for logging request/response.
     /// </summary>
     public class LoggingMiddleware
     {
         private readonly RequestDelegate _next;
-        private StringBuilder _log;
+        private readonly StringBuilder _log;
         private ServerInfo _info;
 
         public LoggingMiddleware(RequestDelegate next, ServerInfo info)
@@ -41,6 +41,8 @@ namespace Middleware.Middlewares
             _log.AppendLine($"VS:{_info.vs}");
 
             log.LogInformation(_log.ToString());
+
+            _log.Clear();
         }
 
     }

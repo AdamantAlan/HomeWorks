@@ -5,27 +5,42 @@ using System.Collections.Generic;
 namespace Middleware.Interfaces
 {
     /// <summary>
-    /// Контракт для обработки карт пользователей.
+    /// Contract for work with user cards.
     /// </summary>
     public interface ICardManager
     {
-        // Можно было бы создать User с cards, поздно задумался.
         /// <summary>
-        /// "БД" карт пользователей.
+        /// database for user cards.
         /// </summary>
         List<Card> Cards { get; set; }
 
         /// <summary>
-        /// Записать карту в "БД".
+        /// Write card in database.
         /// </summary>
-        /// <param name="card">Карта пользователя.</param>
-        CardWriteDto SetCard(Card card);
+        /// <param name="card">user card.</param>
+        CardReadDto SetCard(Card card);
 
         /// <summary>
-        /// Выдать все карты пользователя.
+        /// Check exist user.
         /// </summary>
-        /// <param name="id">id пользователя в "БД".</param>
-        /// <returns></returns>
+        /// <returns>true - user exist;false - user not exist</returns>
+        bool UserExist(long id);
+
+        /// <summary>
+        /// Get all cards of user.
+        /// </summary>
+        /// <param name="id">user id</param>
         IEnumerable<CardReadDto> GetCards(long id);
+
+        /// <summary>
+        /// Change cardholder for user cards.
+        /// </summary>
+        IEnumerable<CardReadDto> ChangeCardHolder(long id, string newName);
+
+        /// <summary>
+        ///Delete user card.
+        /// </summary>
+        CardReadDto DeleteCard(long userId, string pan);
+
     }
 }

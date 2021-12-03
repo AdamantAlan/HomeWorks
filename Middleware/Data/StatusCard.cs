@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Middleware.Data
+﻿namespace Middleware.Data
 {
     /// <summary>
-    /// Статус обработки карты пользователя.
+    /// User card processing status.
     /// </summary>
     public enum StatusCard
-    { 
+    {
         Success,
         Error
     }

@@ -3,11 +3,11 @@
 namespace Middleware.Dto
 {
     /// <summary>
-    /// Dto для чтения из "БД"
+    /// Dto for read data from database.
     /// </summary>
     public class CardReadDto
     {
-        public long Pan { get; set; }
+        public string Pan { get; set; }
 
         public string Name { get; set; }
 
