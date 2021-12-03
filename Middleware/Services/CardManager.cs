@@ -20,25 +20,26 @@ namespace Middleware.Services
 
         public IEnumerable<CardReadDto> GetCards(long id)
         {
-            var cards = Cards.Where(c => c.userId == id);
+            var cards = Cards.Where(c => c.UserId == id);
             var result = _map.Map<IEnumerable<CardReadDto>>(cards);
             return result;
         }
 
-        public CardReadDto SetCard(Card card)
+        public CardReadDto SetCard(CardWriteDto card)
         {
-            Cards.Add(card);
-            return _map.Map<CardReadDto>(card);
+            var _card = _map.Map<Card>(card);
+            Cards.Add(_card);
+            return _map.Map<CardReadDto>(_card);
         }
 
-        public bool UserExist(long id) => Cards.Any(c => c.userId == id);
+        public bool UserExist(long id) => Cards.Any(c => c.UserId == id);
 
         public IEnumerable<CardReadDto> ChangeCardHolder(long id, string newName)
         {
             foreach (var c in Cards)
             {
-                if (c.userId == id)
-                    c.name = newName;
+                if (c.UserId == id)
+                    c.Name = newName;
             }
 
             return GetCards(id);
@@ -46,7 +47,7 @@ namespace Middleware.Services
 
         public CardReadDto DeleteCard(long userId, string pan)
         {
-            var currentCard = Cards.FirstOrDefault(c => c.userId == userId && c.pan == pan);
+            var currentCard = Cards.FirstOrDefault(c => c.UserId == userId && c.Pan == pan);
             Cards.Remove(currentCard);
 
             return _map.Map<CardReadDto>(currentCard);

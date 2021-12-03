@@ -15,7 +15,7 @@ namespace Middleware.Profiles
         public CardProfile()
         {
             CreateMap<Card, CardReadDto>();
-            //CreateMap<Card, CardWriteDto>();
+            CreateMap<CardWriteDto, Card>();
         }
     }
 }

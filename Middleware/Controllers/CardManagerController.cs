@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Middleware.Data;
+using Middleware.Data.DbContexts;
 using Middleware.Dto;
 using Middleware.Extensions;
 using Middleware.Interfaces;
@@ -19,10 +20,12 @@ namespace Middleware.Controllers
     public class CardManagerController : ControllerBase
     {
         private readonly ICardManager _manager;
+        //private readonly CardDbContext _cont;
 
-        public CardManagerController(ICardManager cardManager)
+        public CardManagerController(ICardManager cardManager)//, CardDbContext cont)
         {
             _manager = cardManager;
+        //    _cont = cont;
         }
 
         [HttpGet("test")]
@@ -39,10 +42,12 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<CardReadDto>), 200)]
         [HttpPost("{userId:long}/[action]")]
-        public ActionResult<ResultApi<object>> AddCard(long userId, Card card)
+        public ActionResult<ResultApi<object>> AddCard(long userId, CardWriteDto card)
         {
             card.userId = userId;
             var cardDto = _manager.SetCard(card);
+            //_cont.Cards.Add(new Card() {Cvc=card.cvc,Expire=card.expire, IsDefault= card.isDefault, Name= card.name,Pan=card.pan,UserId=card.userId });
+            //_cont.SaveChanges();
             return Ok(new ResultApi<CardReadDto> { Result = cardDto, ErrorCode = 0, ErrorMessage = null });
         }
 
@@ -83,7 +88,7 @@ namespace Middleware.Controllers
         {
             if (!_manager.UserExist(userId))
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "User not found." });
-
+            //var c = _cont.Cards.ToList();
             var cards = _manager.GetCards(userId);
 
             return Ok(new ResultApi<IEnumerable<CardReadDto>> { Result = cards, ErrorCode = 0, ErrorMessage = null });

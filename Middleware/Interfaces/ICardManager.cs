@@ -18,7 +18,7 @@ namespace Middleware.Interfaces
         /// Write card in database.
         /// </summary>
         /// <param name="card">user card.</param>
-        CardReadDto SetCard(Card card);
+        CardReadDto SetCard(CardWriteDto card);
 
         /// <summary>
         /// Check exist user.
@@ -41,6 +41,5 @@ namespace Middleware.Interfaces
         ///Delete user card.
         /// </summary>
         CardReadDto DeleteCard(long userId, string pan);
-
     }
 }

@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Middleware.Data;
+using Middleware.Data.DbContexts;
 using Middleware.Extensions;
 using Middleware.Filters;
 using Middleware.Filters.Schemas;
@@ -38,6 +40,7 @@ namespace Middleware
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSingleton<ICardManager, CardManager>();
+            services.AddDbContext<CardDbContext>(opt => opt.UseNpgsql(_config.GetConnectionString("Npg")));
 
             services.AddSwaggerGen(c =>
             {

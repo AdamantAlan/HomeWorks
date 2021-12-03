@@ -105,7 +105,7 @@ namespace Middleware.Filters
                 switch (item.Key)
                 {
                     case "card":
-                        var card = item.Value as Card;
+                        var card = item.Value as CardWriteDto;
                         _trace.AppendLine($"CardHolder: {card.name}");
                         _trace.AppendLine($"Cvc: {GetHiddenCvc(card.cvc)}");
                         _trace.AppendLine($"Pan: {GetHiddenPan(card.pan)}");
