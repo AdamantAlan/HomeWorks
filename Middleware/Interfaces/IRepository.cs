@@ -40,7 +40,7 @@ namespace Middleware.Interfaces
         /// <summary>
         /// Delete entity.
         /// </summary>
-        Task DeleteAsync<T>(T entity) where T : class, IEntity;
+        Task<bool> DeleteAsync<T>(T entity) where T : class, IEntity;
 
         /// <summary>
         /// Save entity.

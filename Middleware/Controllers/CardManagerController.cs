@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Middleware.Data;
-using Middleware.Data.DbContexts;
+using Middleware.Data.Commands.Execute;
+using Middleware.Data.Commands.Query;
 using Middleware.Data.Dto;
 using Middleware.Data.Model;
 using Middleware.Dto;
-using Middleware.Extensions;
 using Middleware.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,11 +27,13 @@ namespace Middleware.Controllers
     {
         private readonly IRepository _manager;
         private readonly IMapper _map;
+        private readonly IMediator _mediator;
 
-        public CardManagerController(IRepository cardManager, IMapper map)
+        public CardManagerController(IRepository cardManager, IMapper map, IMediator mediator)
         {
             _manager = cardManager;
             _map = map;
+            _mediator = mediator;
         }
 
         [HttpGet("test")]
@@ -47,13 +50,12 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<CardReadDto>), 200)]
         [HttpPost("{userId:long}/[action]")]
-        public async Task<ActionResult<ResultApi<object>>> AddCard(long userId, CardWriteDto cardWriteDto)
+        public async Task<ActionResult<ResultApi<CardReadDto>>> AddCard(long userId, CardWriteDto cardWriteDto)
         {
             cardWriteDto.userId = userId;
-            var id = await _manager.CreateAsync(_map.Map<Card>(cardWriteDto));
-
+            var id = await _mediator.Send(new CreateCardCommand { Card = _map.Map<Card>(cardWriteDto) });
             var cardReadDto = _map.Map<CardReadDto>(await _manager.GetAsync<Card>(id));
-            return Ok(new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null });
+            return new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null };
         }
 
         /// <summary>
@@ -67,17 +69,17 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<CardReadDto>), 200)]
         [HttpDelete("{userId:long}/[action]")]
-        public async Task<ActionResult<ResultApi<object>>> DeleteCard(long userId, [FromBody] string pan)
+        public async Task<ActionResult<ResultApi<CardReadDto>>> DeleteCard(long userId, [FromBody] string pan)
         {
-            var card = _manager.GetAll<Card>().FirstOrDefault(c => c.UserId == userId && c.Pan == pan);
+            var card = await _mediator.Send(new GetCardForUserIdAndPanCommand { UserId = userId, Pan = pan });
 
             if (card == null)
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Card not found." });
 
-            await _manager.DeleteAsync(card);
+            await _mediator.Send(new DeleteCardCommand { Card = card });
 
             var cardReadDto = _map.Map<CardReadDto>(card);
-            return Ok(new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null });
+            return new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null };
         }
 
         /// <summary>
@@ -90,15 +92,15 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<IEnumerable<CardReadDto>>), 200)]
         [HttpGet("{userId:long}/[action]")]
-        public async Task<ActionResult<ResultApi<IEnumerable<object>>>> GetCards(long userId)
+        public async Task<ActionResult<ResultApi<IEnumerable<CardReadDto>>>> GetCards(long userId)
         {
-            var cards = await _manager.GetAll<Card>().Where(c => c.UserId == userId).ToListAsync();
+            var cards = await _mediator.Send(new GetCardsForUSerIdCommand { UserId = userId });
 
             if (!cards.Any())
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Cards not found." });
 
             var cardsReadDto = _map.Map<IEnumerable<CardReadDto>>(cards);
-            return Ok(new ResultApi<IEnumerable<CardReadDto>> { Result = cardsReadDto, ErrorCode = 0, ErrorMessage = null });
+            return new ResultApi<IEnumerable<CardReadDto>> { Result = cardsReadDto, ErrorCode = 0, ErrorMessage = null };
         }
 
         /// <summary>
@@ -112,14 +114,15 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<CardReadDto>), 200)]
         [HttpPost("{userId:long}/[action]")]
-        public ActionResult<ResultApi<object>> GetCard([FromRoute] long userId, [FromBody] string pan)
+        public async Task<ActionResult<ResultApi<CardReadDto>>> GetCard([FromRoute] long userId, [FromBody] string pan)
         {
-            var card = _manager.GetAll<Card>().FirstOrDefault(c => c.UserId == userId && c.Pan == pan);
+            var card = await _mediator.Send(new GetCardForUserIdAndPanCommand { UserId = userId, Pan = pan });
+
             if (card == null)
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Card not found." });
 
             var cardReadDto = _map.Map<CardReadDto>(card);
-            return Ok(new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null });
+            return new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null };
         }
 
         /// <summary>
@@ -135,26 +138,20 @@ namespace Middleware.Controllers
         [ProducesResponseType(typeof(ResultApi<IEnumerable<CardReadDto>>), 200)]
         [ProducesResponseType(typeof(ResultApi<string>), 400)]
         [HttpPatch("{userId:long}/[action]")]
-        public async Task<ActionResult<ResultApi<IEnumerable<object>>>> ChangeCardHolder([FromRoute] long userId, [FromBody] string cardHolderName)
+        public async Task<ActionResult<ResultApi<IEnumerable<CardReadDto>>>> ChangeCardHolder([FromRoute] long userId, [FromBody] string cardHolderName)
         {
-
             if (long.TryParse(cardHolderName, out long c))
                 return BadRequest(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 801, ErrorMessage = "Wrong cardholder." });
 
-            var cards = await _manager.GetAll<Card>().Where(c => c.UserId == userId).ToListAsync();
+            var cards = await _mediator.Send(new GetCardsForUSerIdCommand { UserId = userId });
+
             if (!cards.Any())
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Cards not found." });
 
-            foreach (Card card in cards)
-            {
-                card.Name = cardHolderName;
-            }
-
-            if (!(await _manager.SaveChangeAsync()))
-                return new InternalServerErrorObjectResult(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 812, ErrorMessage = "Today change cardholder is lock." });
+            await _mediator.Send(new ChangeCardHolderNameCardsCommand { Cards = cards, CardHolderName = cardHolderName });
 
             var cardsReadDtos = _map.Map<IEnumerable<CardReadDto>>(cards);
-            return Ok(new ResultApi<IEnumerable<CardReadDto>> { Result = cardsReadDtos, ErrorCode = 0, ErrorMessage = null });
+            return new ResultApi<IEnumerable<CardReadDto>> { Result = cardsReadDtos, ErrorCode = 0, ErrorMessage = null };
         }
     }
 }

@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -41,6 +42,7 @@ namespace Middleware
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IRepository, RepositoryDbHomeWork>();
             services.AddDbContext<HomeWorkDbContext>(opt => opt.UseNpgsql(_config.GetConnectionString("Npg")));
+            services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddSwaggerGen(c =>
             {
