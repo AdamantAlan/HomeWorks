@@ -1,10 +1,6 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Middleware.Data;
+﻿using Microsoft.EntityFrameworkCore;
 using Middleware.Data.DbContexts;
-using Middleware.Dto;
 using Middleware.Interfaces;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 

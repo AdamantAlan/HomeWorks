@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Middleware.Data;
 using Middleware.Data.Commands.Execute;
 using Middleware.Data.Commands.Query;
@@ -53,7 +52,8 @@ namespace Middleware.Controllers
         public async Task<ActionResult<ResultApi<CardReadDto>>> AddCard(long userId, CardWriteDto cardWriteDto)
         {
             cardWriteDto.userId = userId;
-            var id = await _mediator.Send(new CreateCardCommand { Card = _map.Map<Card>(cardWriteDto) });
+            var id = await _mediator.Send(new CreateCardAsyncCommand { Card = _map.Map<Card>(cardWriteDto) });
+
             var cardReadDto = _map.Map<CardReadDto>(await _manager.GetAsync<Card>(id));
             return new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null };
         }
@@ -71,12 +71,12 @@ namespace Middleware.Controllers
         [HttpDelete("{userId:long}/[action]")]
         public async Task<ActionResult<ResultApi<CardReadDto>>> DeleteCard(long userId, [FromBody] string pan)
         {
-            var card = await _mediator.Send(new GetCardForUserIdAndPanCommand { UserId = userId, Pan = pan });
+            var card = await _mediator.Send(new GetCardForUserIdAndPanAsyncCommand { UserId = userId, Pan = pan });
 
             if (card == null)
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Card not found." });
 
-            await _mediator.Send(new DeleteCardCommand { Card = card });
+            await _mediator.Send(new DeleteCardAsyncCommand { Card = card });
 
             var cardReadDto = _map.Map<CardReadDto>(card);
             return new ResultApi<CardReadDto> { Result = cardReadDto, ErrorCode = 0, ErrorMessage = null };
@@ -94,7 +94,7 @@ namespace Middleware.Controllers
         [HttpGet("{userId:long}/[action]")]
         public async Task<ActionResult<ResultApi<IEnumerable<CardReadDto>>>> GetCards(long userId)
         {
-            var cards = await _mediator.Send(new GetCardsForUSerIdCommand { UserId = userId });
+            var cards = await _mediator.Send(new GetCardsForUSerIdAsyncCommand { UserId = userId });
 
             if (!cards.Any())
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Cards not found." });
@@ -116,7 +116,7 @@ namespace Middleware.Controllers
         [HttpPost("{userId:long}/[action]")]
         public async Task<ActionResult<ResultApi<CardReadDto>>> GetCard([FromRoute] long userId, [FromBody] string pan)
         {
-            var card = await _mediator.Send(new GetCardForUserIdAndPanCommand { UserId = userId, Pan = pan });
+            var card = await _mediator.Send(new GetCardForUserIdAndPanAsyncCommand { UserId = userId, Pan = pan });
 
             if (card == null)
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Card not found." });
@@ -143,12 +143,12 @@ namespace Middleware.Controllers
             if (long.TryParse(cardHolderName, out long c))
                 return BadRequest(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 801, ErrorMessage = "Wrong cardholder." });
 
-            var cards = await _mediator.Send(new GetCardsForUSerIdCommand { UserId = userId });
+            var cards = await _mediator.Send(new GetCardsForUSerIdAsyncCommand { UserId = userId });
 
             if (!cards.Any())
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Cards not found." });
 
-            await _mediator.Send(new ChangeCardHolderNameCardsCommand { Cards = cards, CardHolderName = cardHolderName });
+            await _mediator.Send(new ChangeCardHolderNameCardsAsyncCommand { Cards = cards, CardHolderName = cardHolderName });
 
             var cardsReadDtos = _map.Map<IEnumerable<CardReadDto>>(cards);
             return new ResultApi<IEnumerable<CardReadDto>> { Result = cardsReadDtos, ErrorCode = 0, ErrorMessage = null };

@@ -1,6 +1,4 @@
-﻿using Middleware.Data;
-
-namespace Middleware.Data.Dto
+﻿namespace Middleware.Data.Dto
 {
     /// <summary>
     /// Dto for read data from database.
