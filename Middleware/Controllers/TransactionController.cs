@@ -15,6 +15,9 @@ namespace Middleware.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [ProducesResponseType(typeof(ResultApi<string>), 401)]
+    [ProducesResponseType(typeof(ResultApi<string>), 500)]
+    [ProducesResponseType(typeof(ResultApi<string>), 404)]
     public class TransactionController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -38,10 +41,11 @@ namespace Middleware.Controllers
         /// <response code="500">Server error</response>
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<IEnumerable<TransactionReadDto>>), 200)]
-        [HttpPost("user/{userId:long}/[action]")]
+        [HttpGet("user/{userId:long}/[action]")]
         public async Task<ActionResult<ResultApi<IEnumerable<TransactionReadDto>>>> GetAllTransaction(long userId)
         {
             var transactions = await _mediator.Send(new GetAllTransactionsAsyncCommand { UserId = userId });
+
             if (!transactions.Any())
                 return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 1800, ErrorMessage = "Transactions not found." });
 
@@ -65,7 +69,7 @@ namespace Middleware.Controllers
         {
             var defaultCardId = await _mediator.Send(new GetDefaultCardIdAsyncCommand { UserId = userId });
 
-            if (defaultCardId == 0)
+            if (defaultCardId < 0)
                 return NotFound(new ResultApi<string> { Result = null, ErrorCode = 1802, ErrorMessage = "Default card not found." });
 
             var idAddTransaction = await _mediator.Send(new CreateTransactionByCardAsyncCommand
@@ -85,7 +89,7 @@ namespace Middleware.Controllers
         /// Add operations of user card.
         /// </summary>
         /// <param name="userId">User id</param>
-        /// <param name="CardId">User id</param>
+        /// <param name="cardId">Card id</param>
         /// <param name="amount">money</param>
         /// <param name="transactionType">type of transacion</param>
         /// <response code="200">Transaction added</response>
@@ -94,7 +98,7 @@ namespace Middleware.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<TransactionReadDto>), 200)]
         [HttpPost("user/{userId:long}/[action]")]
-        public async Task<ActionResult<ResultApi<TransactionReadDto>>> AddTransactionByExistCard(long userId, long cardId, decimal amount, byte transactionType)
+        public async Task<ActionResult<ResultApi<TransactionReadDto>>> AddTransactionByExistCard(long userId, [FromBody] long cardId, decimal amount, byte transactionType)
         {
             var isCardExist = await _mediator.Send(new CheckCardExistAsyncCommand { CardId = cardId });
 
@@ -119,7 +123,7 @@ namespace Middleware.Controllers
         /// </summary>
         /// <param name="userId">User id</param>
         /// <param name="amount">money</param>
-        /// <param name="transactionType">type of transacion</param>
+        /// <param name="transactionType">type of transaction</param>
         /// <param name="cardWriteDto">new user card</param>
         /// <response code="200">Transaction added</response>
         /// <response code="500">Server error</response>
@@ -128,7 +132,7 @@ namespace Middleware.Controllers
         [HttpPost("user/{userId:long}/[action]")]
         public async Task<ActionResult<ResultApi<TransactionReadDto>>> AddTransactionByNewCard(long userId, decimal amount, byte transactionType, CardWriteDto cardWriteDto)
         {
-
+            cardWriteDto.userId = userId;
             var cardId = await _mediator.Send(new CreateCardAsyncCommand { Card = _map.Map<Card>(cardWriteDto) });
 
             var idAddTransaction = await _mediator.Send(new CreateTransactionByCardAsyncCommand

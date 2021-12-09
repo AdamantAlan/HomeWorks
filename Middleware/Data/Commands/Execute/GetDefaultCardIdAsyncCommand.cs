@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Middleware.Data.Model;
 using Middleware.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,9 +21,11 @@ namespace Middleware.Data.Commands.Execute
                 _db = db;
             }
 
-            public async Task<long> Handle(GetDefaultCardIdAsyncCommand findDefaultCard, CancellationToken cancellationToken) =>
-                
-                (await _db.GetAll<Card>().Where(c => c.UserId == findDefaultCard.UserId && c.IsDefault).FirstOrDefaultAsync()).Id;
+            public async Task<long> Handle(GetDefaultCardIdAsyncCommand findDefaultCard, CancellationToken cancellationToken)
+            {
+                var card = await _db.GetAll<Card>().Where(c => c.UserId == findDefaultCard.UserId && c.IsDefault).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                return card != null ? card.Id : -1;
+            }
 
         }
     }
