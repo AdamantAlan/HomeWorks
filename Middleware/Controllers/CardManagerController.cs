@@ -36,7 +36,7 @@ namespace Middleware.Controllers
         }
 
         [HttpGet("test")]
-        public ActionResult<string> Test() => Ok(new ResultApi<string> { Result = "Success!" });
+        public ActionResult<string> Test() => Ok(new ResultApi<string> { Result = "Success CardManager controller!" });
 
         /// <summary>
         /// Add new user card.

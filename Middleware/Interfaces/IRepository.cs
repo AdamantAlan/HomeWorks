@@ -25,7 +25,7 @@ namespace Middleware.Interfaces
         IQueryable<T> GetAll<T>() where T : class, IEntity;
 
         /// <summary>
-        /// Get all entity.
+        /// Get entity by id.
         /// </summary>
         Task<T> GetAsync<T>(long id) where T : class, IEntity;
 
