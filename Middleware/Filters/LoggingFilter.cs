@@ -97,6 +97,29 @@ namespace Middleware.Filters
                 _trace.AppendLine("StatusCard: " + card.Result.StatusCard.ToString());
                 _trace.AppendLine();
             }
+
+            if (result is ResultApi<IEnumerable<TransactionReadDto>> tDtos)
+            {
+                foreach (var t in tDtos.Result)
+                {
+                    _trace.AppendLine("CardId: " + t.CardId);
+                    _trace.AppendLine("Date: " + t.DateOfTransaction);
+                    _trace.AppendLine("Date: " + t.Amount);
+                    _trace.AppendLine("Type: " + t.Operation);
+                    _trace.AppendLine();
+                }
+
+                return;
+            }
+
+            if (result is ResultApi<TransactionReadDto> tDto)
+            {
+                _trace.AppendLine("CardId: " + tDto.Result.CardId);
+                _trace.AppendLine("Date: " + tDto.Result.DateOfTransaction);
+                _trace.AppendLine("Date: " + tDto.Result.Amount);
+                _trace.AppendLine("Type: " + tDto.Result.Operation);
+                _trace.AppendLine();
+            }
         }
 
         private void LoggingDataRequest(ActionExecutingContext context)
@@ -105,7 +128,7 @@ namespace Middleware.Filters
             {
                 switch (item.Key)
                 {
-                    case "card":
+                    case "cardWriteDto":
                         var card = item.Value as CardWriteDto;
                         _trace.AppendLine($"CardHolder: {card.name}");
                         _trace.AppendLine($"Cvc: {GetHiddenCvc(card.cvc)}");
