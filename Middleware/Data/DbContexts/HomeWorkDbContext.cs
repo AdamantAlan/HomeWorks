@@ -14,5 +14,7 @@ namespace Middleware.Data.DbContexts
         }
 
         public DbSet<Card> Cards { get; set; }
+
+        public DbSet<Transaction> Transactions { get; set; }
     }
 }
