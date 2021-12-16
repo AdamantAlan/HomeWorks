@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Data.Dto;
 using Data.Model;
-using Data.Dto;
+using Data.Data.MessageMQ;
 
 namespace CardManager.Profiles
 {
@@ -10,6 +10,7 @@ namespace CardManager.Profiles
     /// <see cref="CardModel"/>
     /// <see cref="CardReadDto"/>
     /// <see cref="CardWriteDto"/>
+    /// <see cref= "NewCardMessage" />    
     /// </summary>
     public class CardProfile : Profile
     {
@@ -17,6 +18,7 @@ namespace CardManager.Profiles
         {
             CreateMap<CardModel, CardReadDto>();
             CreateMap<CardWriteDto, CardModel>();
+            CreateMap<NewCardMessage, CardModel>();
         }
     }
 }

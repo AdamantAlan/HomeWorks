@@ -18,6 +18,8 @@ using Microsoft.OpenApi.Models;
 using System.IO;
 using Filters.Schemas;
 using Data;
+using MassTransit;
+using Data.Data.MessageMQ;
 
 namespace TransactionManager
 {
@@ -43,6 +45,18 @@ namespace TransactionManager
             services.AddScoped<IRepository, RepositoryDbHomeWorkBase>();
             services.AddDbContext<HomeWorkDbContext>(opt => opt.UseNpgsql(_config.GetConnectionString("Npg")));
             services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.ConfigureEndpoints(context);
+                });
+
+                x.AddRequestClient<NewCardMessage>();
+            });
+
+            services.AddMassTransitHostedService();
 
             services.AddSwaggerGen(c =>
             {

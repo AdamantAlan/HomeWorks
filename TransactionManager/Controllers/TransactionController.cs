@@ -5,10 +5,11 @@ using Data;
 using Data.Commands.Execute;
 using Data.Commands.Query;
 using Data.Dto;
-using Data.Model;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MassTransit;
+using Data.Data.MessageMQ;
 
 namespace TransactionManager.Controllers
 {
@@ -21,11 +22,13 @@ namespace TransactionManager.Controllers
     {
         private readonly IMediator _mediator;
         private readonly IMapper _map;
+        private readonly IRequestClient<NewCardMessage> _client;
 
-        public TransactionController(IMediator mediator, IMapper map)
+        public TransactionController(IMediator mediator, IMapper map, IRequestClient<NewCardMessage> client)
         {
             _mediator = mediator;
             _map = map;
+            _client = client;
         }
 
         [HttpGet("test")]
@@ -132,14 +135,16 @@ namespace TransactionManager.Controllers
         public async Task<ActionResult<ResultApi<TransactionReadDto>>> AddTransactionByNewCard(long userId, decimal amount, byte transactionType, CardWriteDto cardWriteDto)
         {
             cardWriteDto.userId = userId;
-            var cardId = await _mediator.Send(new CreateCardAsyncCommand { Card = _map.Map<CardModel>(cardWriteDto) });
+            var temp = _map.Map<NewCardMessage>(cardWriteDto);
+            var cardid = await _client.GetResponse<NewCardMessageResponse>(temp);
+            var id = cardid.Message.Id;
 
             var idAddTransaction = await _mediator.Send(new CreateTransactionByCardAsyncCommand
             {
                 UserId = userId,
                 Amount = amount,
                 TransactionType = (TransactionType)transactionType,
-                CardId = cardId
+                CardId = cardid.Message.Id
             });
 
             var transactionReadDto = _map.Map<TransactionReadDto>(await _mediator.Send(new GetTransactionByIdAsyncCommand { Id = idAddTransaction }));

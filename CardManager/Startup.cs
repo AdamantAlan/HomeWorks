@@ -17,6 +17,8 @@ using CardManager.Filters;
 using Data.Repositories;
 using CardManager.Filters.Schemas;
 using CardManager.Extensions;
+using MassTransit;
+using CardManager.Service.Consumers;
 
 namespace CardManager
 {
@@ -42,6 +44,18 @@ namespace CardManager
             services.AddScoped<IRepository, RepositoryDbHomeWorkBase>();
             services.AddDbContext<HomeWorkDbContext>(opt => opt.UseNpgsql(_config.GetConnectionString("Npg")));
             services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddMassTransit(x =>
+            {
+                x.AddConsumer<NewCardCreateConsumer>();
+
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
+
+            services.AddMassTransitHostedService();
 
             services.AddSwaggerGen(c =>
             {
