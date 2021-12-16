@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TransactionManager</name>
+    </assembly>
+    <members>
+        <member name="M:TransactionManager.Controllers.TransactionController.GetAllTransaction(System.Int64)">
+            <summary>
+            Get operations of user cards.
+            </summary>
+            <param name="userId">User id</param>
+            <response code="200">Transactions getted</response>
+            <response code="404">Transactions not found</response>
+            <response code="500">Server error</response>
+            <returns>Result work server</returns>
+        </member>
+        <member name="M:TransactionManager.Controllers.TransactionController.AddTransactionByDefaultCard(System.Int64,System.Decimal,System.Byte)">
+            <summary>
+            Add operations of default user card.
+            </summary>
+            <param name="userId">User id</param>
+            <param name="amount">money</param>
+            <param name="transactionType">type of transacion</param>
+            <response code="200">Transaction added</response>
+            <response code="404">Default card not found</response>
+            <response code="500">Server error</response>
+            <returns>Result work server</returns>
+        </member>
+        <member name="M:TransactionManager.Controllers.TransactionController.AddTransactionByExistCard(System.Int64,System.Int64,System.Decimal,System.Byte)">
+            <summary>
+            Add operations of user card.
+            </summary>
+            <param name="userId">User id</param>
+            <param name="cardId">Card id</param>
+            <param name="amount">money</param>
+            <param name="transactionType">type of transacion</param>
+            <response code="200">Transaction added</response>
+            <response code="404">Card not found</response>
+            <response code="500">Server error</response>
+            <returns>Result work server</returns>
+        </member>
+        <member name="M:TransactionManager.Controllers.TransactionController.AddTransactionByNewCard(System.Int64,System.Decimal,System.Byte,Data.Dto.CardWriteDto)">
+            <summary>
+            Add operations of new user card.
+            </summary>
+            <param name="userId">User id</param>
+            <param name="amount">money</param>
+            <param name="transactionType">type of transaction</param>
+            <param name="cardWriteDto">new user card</param>
+            <response code="200">Transaction added</response>
+            <response code="500">Server error</response>
+            <returns>Result work server</returns>
+        </member>
+        <member name="T:Filters.ExceptionFilter">
+            <summary>
+            Filter for catching errors response.
+            </summary>
+        </member>
+        <member name="T:Filters.InternalServerErrorObjectResult">
+            <summary>
+            Result server work with code 500;
+            </summary>
+        </member>
+        <member name="T:Filters.LoggingFilter">
+            <summary>
+            Filter for logging request/response.
+            </summary>
+        </member>
+        <member name="T:Filters.Schemas.EnumSchemaFilter">
+            <summary>
+            Schema filter for swagger.
+            </summary>
+        </member>
+        <member name="T:Transaction.Profiles.TransactionProfile">
+            <summary>
+            Opions mapper for card.
+            <see cref="T:Data.Model.CardModel"/>
+            <see cref="T:Data.Dto.CardReadDto"/>
+            <see cref="T:Data.Dto.CardWriteDto"/>
+            Opions mapper for transaction.
+            <see cref="T:Data.Model.TransactionModel"/>
+            <see cref="T:Data.Dto.TransactionReadDto"/>
+            <see cref="T:Data.Dto.TransactionWriteDto"/>
+            </summary>
+        </member>
+    </members>
+</doc>
