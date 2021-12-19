@@ -152,5 +152,45 @@ namespace CardManager.Controllers
             var cardsReadDtos = _map.Map<IEnumerable<CardReadDto>>(cards);
             return new ResultApi<IEnumerable<CardReadDto>> { Result = cardsReadDtos, ErrorCode = 0, ErrorMessage = null };
         }
+
+        /// <summary>
+        /// Get default user card 
+        /// </summary>
+        /// <param name="userId">User id</param>
+        /// <response code="200">Card getted</response>
+        /// <response code="404">User not found</response>
+        /// <response code="500">Server error</response>
+        /// <returns>Result work server</returns>
+        [ProducesResponseType(typeof(ResultApi<long>), 200)]
+        [HttpGet("{userId:long}/[action]")]
+        public async Task<ActionResult<ResultApi<long>>> GetDefaultUserCard(long userId)
+        {
+            var card = await _mediator.Send(new GetDefaultCardIdAsyncCommand { UserId = userId });
+
+            if (card == -1)
+                return NotFound(new ResultApi<string> { Result = userId.ToString(), ErrorCode = 800, ErrorMessage = "Card not found." });
+
+            return new ResultApi<long> { Result = card, ErrorCode = 0, ErrorMessage = null };
+        }
+
+        /// <summary>
+        /// Get check exist user card 
+        /// </summary>
+        /// <param name="cardId">User id</param>
+        /// <response code="200">Card exist</response>
+        /// <response code="404">Card not found</response>
+        /// <response code="500">Server error</response>
+        /// <returns>Result work server</returns>
+        [ProducesResponseType(typeof(ResultApi<long>), 200)]
+        [HttpGet("{cardId:long}/[action]")]
+        public async Task<ActionResult<ResultApi<bool>>> CheckExistUserCard(long cardId)
+        {
+            var exist = await _mediator.Send(new CheckCardExistAsyncCommand { CardId = cardId });
+
+            if (!exist)
+                return NotFound(new ResultApi<string> { Result = cardId.ToString(), ErrorCode = 800, ErrorMessage = "Card not found." });
+
+            return new ResultApi<bool> { Result = exist, ErrorCode = 0, ErrorMessage = null };
+        }
     }
 }

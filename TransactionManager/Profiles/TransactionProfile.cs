@@ -10,11 +10,11 @@ namespace Transaction.Profiles
     /// <see cref="CardModel"/>
     /// <see cref="CardReadDto"/>
     /// <see cref="CardWriteDto"/>
+    /// <see cref="NewCardMessageV1"/>
     /// Opions mapper for transaction.
     /// <see cref="TransactionModel"/>
     /// <see cref="TransactionReadDto"/>
     /// <see cref="TransactionWriteDto"/>
-    /// <see cref="NewCardMessage"/>
     /// </summary>
     public class TransactionProfile : Profile
     {
@@ -22,7 +22,8 @@ namespace Transaction.Profiles
         {
             CreateMap<CardModel, CardReadDto>();
             CreateMap<CardWriteDto, CardModel>();
-            CreateMap<CardWriteDto, NewCardMessage>();
+            CreateMap<CardWriteDto, NewCardMessageV1>();
+            CreateMap<CardWriteDto, NewCardMessageV2>();
             CreateMap<TransactionModel, TransactionReadDto>();
             CreateMap<TransactionWriteDto, TransactionModel>();
         }

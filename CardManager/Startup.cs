@@ -47,8 +47,8 @@ namespace CardManager
 
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<NewCardCreateConsumer>();
-
+                x.AddConsumer<NewCardCreateConsumerV1>();
+                x.AddConsumer<NewCardCreateConsumerV2>();
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.ConfigureEndpoints(context);

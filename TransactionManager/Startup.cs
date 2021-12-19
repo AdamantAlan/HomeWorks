@@ -20,6 +20,7 @@ using Filters.Schemas;
 using Data;
 using MassTransit;
 using Data.Data.MessageMQ;
+using TransactionManager.Services;
 
 namespace TransactionManager
 {
@@ -41,8 +42,17 @@ namespace TransactionManager
                 opt.Filters.Add(typeof(ExceptionFilter));
             });
 
+            services.AddHttpContextAccessor();
+            services.AddHttpClient<IHttpClientForServiceCardManager, HttpClientForServiceCardManager>();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IRepository, RepositoryDbHomeWorkBase>();
+            services.AddHttpClient<IHttpClientForServiceCardManager, HttpClientForServiceCardManager>(client => 
+            {
+                client.BaseAddress = new Uri("http://localhost:12635");
+                client.DefaultRequestHeaders.Add("API-KEY", "test");
+            });
+
             services.AddDbContext<HomeWorkDbContext>(opt => opt.UseNpgsql(_config.GetConnectionString("Npg")));
             services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -53,7 +63,7 @@ namespace TransactionManager
                     cfg.ConfigureEndpoints(context);
                 });
 
-                x.AddRequestClient<NewCardMessage>();
+                x.AddRequestClient<NewCardMessageV1>();
             });
 
             services.AddMassTransitHostedService();

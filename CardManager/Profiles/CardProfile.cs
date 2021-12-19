@@ -10,7 +10,7 @@ namespace CardManager.Profiles
     /// <see cref="CardModel"/>
     /// <see cref="CardReadDto"/>
     /// <see cref="CardWriteDto"/>
-    /// <see cref= "NewCardMessage" />    
+    /// <see cref= "NewCardMessageV1" />    
     /// </summary>
     public class CardProfile : Profile
     {
@@ -18,7 +18,8 @@ namespace CardManager.Profiles
         {
             CreateMap<CardModel, CardReadDto>();
             CreateMap<CardWriteDto, CardModel>();
-            CreateMap<NewCardMessage, CardModel>();
+            CreateMap<NewCardMessageV1, CardModel>();
+            CreateMap<NewCardMessageV2, CardModel>();
         }
     }
 }
