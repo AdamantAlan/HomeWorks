@@ -12,6 +12,7 @@ using MassTransit;
 using Data.Data.MessageMQ;
 using System;
 using TransactionManager.Services;
+using Data.Data.Commands.Execute;
 
 namespace TransactionManager.Controllers
 {
@@ -161,7 +162,6 @@ namespace TransactionManager.Controllers
         /// Add operations of new user card.
         /// </summary>
         /// <param name="userId">User id</param>
-        /// <param name="cardId">Card id</param>
         /// <param name="amount">money</param>
         /// <param name="transactionType">type of transaction</param>
         /// <param name="cardWriteDto">new user card</param>
@@ -170,11 +170,15 @@ namespace TransactionManager.Controllers
         /// <returns>Result work server</returns>
         [ProducesResponseType(typeof(ResultApi<TransactionReadDto>), 200)]
         [HttpPost("user/{userId:long}/[action]")]
-        public async Task<ActionResult<ResultApi<TransactionReadDto>>> AddTransactionByNewCardV2(long userId, decimal amount, byte transactionType, long cardId, CardWriteDto cardWriteDto)
+        public async Task<ActionResult<ResultApi<TransactionReadDto>>> AddTransactionByNewCardV2(long userId, decimal amount, byte transactionType, CardWriteDto cardWriteDto)
         {
             cardWriteDto.userId = userId;
             var message = _map.Map<NewCardMessageV2>(cardWriteDto);
+
+            //! Since the data type of the id property is long, I did not rewrite it to guid, but wrote the usual generation by datatime.
+            var cardId = await _mediator.Send(new GenerateIdUserCardAsyncCommand { UserId = userId });
             message.Id = cardId;
+
             await _bus.Publish(message);
 
             var idAddTransaction = await _mediator.Send(new CreateTransactionByCardAsyncCommand
